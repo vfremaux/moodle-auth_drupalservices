@@ -24,7 +24,6 @@ $PAGE->set_url($url);
 
 $context = context_system::instance();
 $PAGE->set_context($context);
-
 require_login();
 require_capability('moodle/site:config', context_system::instance());
 

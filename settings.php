@@ -11,8 +11,8 @@
  *
  * PHP version 5
  *
- * @category auth
- * @package  auth_drupalservices
+ * @category CategoryName
+ * @package  Drupal_Services
  * @author   Dave Cannon <dave@baljarra.com>
  * @license  http://www.gnu.org/copyleft/gpl.html GNU Public License
  * @link     https://github.com/cannod/moodle-drupalservices

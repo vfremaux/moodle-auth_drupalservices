@@ -26,11 +26,11 @@
  *
  * PHP version 5
  *
- * @category    auth
- * @package     auth_drupalservices
- * @author      Dave Cannon <dave@baljarra.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @link        https://github.com/cannod/moodle-drupalservices 
+ * @category CategoryName
+ * @package  Drupal_Services 
+ * @author   Dave Cannon <dave@baljarra.com>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU Public License
+ * @link     https://github.com/cannod/moodle-drupalservices 
  *
  */
 defined('MOODLE_INTERNAL') || die();
@@ -40,7 +40,13 @@ require_once $CFG->dirroot . '/cohort/lib.php';
 require_once $CFG->dirroot . '/auth/drupalservices/REST-API.php';
 
 /**
- * class auth_plugin_drupalservices
+ * class auth_plugin_drupalservices 
+ *
+ * @category CategoryName
+ * @package  Drupal_Services 
+ * @author   Dave Cannon <dave@baljarra.com>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU Public License
+ * @link     https://github.com/cannod/moodle-drupalservices
  */
 class auth_plugin_drupalservices extends auth_plugin_base {
 
@@ -217,12 +223,6 @@ class auth_plugin_drupalservices extends auth_plugin_base {
         $user = $DB->get_record('user', array('idnumber' => $uid, 'mnethostid' => $CFG->mnet_localhost_id));
 
         if (empty($user)) {
-            // Try by username
-            $username = ''.$drupal_user->name; // Ensures scalarized.
-            $user = $DB->get_record('user', array('username' => $username, 'auth' => 'drupalservices', 'mnethostid' => $CFG->mnet_localhost_id));
-        }
-
-        if (empty($user)) {
             // Build the new user object to be put into the Moodle database.
             $user = new object();
         }
@@ -258,10 +258,9 @@ class auth_plugin_drupalservices extends auth_plugin_base {
         }
 
         $user->idnumber = $uid;
-        $status = ''.$drupal_user->status;
-        $user->confirmed =  (!empty($status)) ? 1 : 0; // Ensures scalarized.
+        $user->confirmed = (''.$drupal_user->status ? 1 : 0); // Ensures scalarized.
         $user->deleted = 0;
-        $user->suspended = (empty($status)) ? 1 : 0; // Ensures scalarized.
+        $user->suspended = (!''.$drupal_user->status ? 1 : 0); // Ensures scalarized.
 
         // City (and maybe country) are required and have size requirements that need to be parsed.
         if (empty($user->city)) $user->city = 'none';

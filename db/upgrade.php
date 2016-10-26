@@ -26,8 +26,8 @@
  *
  * PHP version 5
  *
- * @category auth
- * @package  auth_drupalservices
+ * @category CategoryName
+ * @package  Drupal_Services
  * @author   Dave Cannon <dave@baljarra.com>
  * @license  http://www.gnu.org/copyleft/gpl.html GNU Public License
  * @link     https://github.com/cannod/moodle-drupalservices
@@ -35,24 +35,15 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-function xmldb_auth_drupalservices_upgrade($oldversion = 0) {
-
-    $result = true;
-
-    if ($oldversion < 2014111400) {
-        /*
-         * This module has been tracking variables using the wrong name syntax. this retroactively goes
-         * back and fixes them to be the proper plugin key upon upgrade
-         */
-        $config = get_config('auth/drupalservices');
-
-        foreach ((array)$config as $key => $value) {
-            set_config($key, $value, 'auth_drupalservices');
-        }
-
-        unset_all_config_for_plugin('auth/drupalservices');
-        upgrade_plugin_savepoint(true, 2014111400, 'auth', 'drupalservices');
+function xmldb_auth_drupalservices_upgrade($oldversion){
+  if($oldversion < 2014111400) {
+    // This module has been tracking variables using the wrong name syntax. this retroactively goes
+    // back and fixes them to be the proper plugin key upon upgrade
+    $config = get_config('auth/drupalservices');
+    foreach ((array)$config as $key => $value) {
+      set_config($key, $value, 'auth_drupalservices');
     }
-
-    return $result;
+    unset_all_config_for_plugin('auth/drupalservices');
+  }
+  upgrade_plugin_savepoint(true, 2014123000, 'auth', 'drupalservices');
 }
