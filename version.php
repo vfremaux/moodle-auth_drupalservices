@@ -18,8 +18,6 @@
  * Authentication Plugin: Drupal Services Single Sign-on
  *
  * This module is based on work by Arsham Skrenes and was lightly redesigned by Valery Fremaux
- *
- * This module is based on work by Arsham Skrenes.
  * This module will look for a Drupal cookie that represents a valid,
  * authenticated session, and will use it to create an authenticated Moodle
  * session for the same user. The Drupal user will be synchronized with the
@@ -38,10 +36,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version = 2015091000; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires = 2014050800; // Requires this Moodle version.
+$plugin->requires = 2014110400; // Requires this Moodle version.
 $plugin->component = 'auth_drupalservices'; // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '2.7 (Build 2015091000)';
+$plugin->release = '2.8 (Build 2015091000)';
 
 // Non moodle attributes.
-$plugin->codeincrement = '2.7.0000';
+$plugin->codeincrement = '2.8.0000';

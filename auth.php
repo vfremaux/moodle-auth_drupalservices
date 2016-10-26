@@ -26,11 +26,11 @@
  *
  * PHP version 5
  *
- * @category CategoryName
- * @package  Drupal_Services 
- * @author   Dave Cannon <dave@baljarra.com>
- * @license  http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @link     https://github.com/cannod/moodle-drupalservices 
+ * @category    auth
+ * @package     auth_drupalservices
+ * @author      Dave Cannon <dave@baljarra.com>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU Public License
+ * @link        https://github.com/cannod/moodle-drupalservices 
  *
  */
 defined('MOODLE_INTERNAL') || die();
@@ -40,13 +40,7 @@ require_once $CFG->dirroot . '/cohort/lib.php';
 require_once $CFG->dirroot . '/auth/drupalservices/REST-API.php';
 
 /**
- * class auth_plugin_drupalservices 
- *
- * @category CategoryName
- * @package  Drupal_Services 
- * @author   Dave Cannon <dave@baljarra.com>
- * @license  http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @link     https://github.com/cannod/moodle-drupalservices
+ * class auth_plugin_drupalservices
  */
 class auth_plugin_drupalservices extends auth_plugin_base {
 
