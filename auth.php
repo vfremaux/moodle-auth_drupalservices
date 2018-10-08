@@ -40,7 +40,7 @@ require_once $CFG->dirroot . '/cohort/lib.php';
 require_once $CFG->dirroot . '/auth/drupalservices/REST-API.php';
 
 /**
- * class auth_plugin_drupalservices 
+ * class auth_plugin_drupalservices
  *
  * @category CategoryName
  * @package  Drupal_Services 
@@ -53,7 +53,7 @@ class auth_plugin_drupalservices extends auth_plugin_base {
     /**
      * Constructor
      */
-    function auth_plugin_drupalservices() {
+    function __construct() {
         $this->authtype = 'drupalservices';
         $this->config = get_config('auth_drupalservices');
     }
