@@ -62,14 +62,20 @@ $drupalauth = get_auth_plugin('drupalservices');
  * this could then be used during first time configuration and automate the settings better.
 **/
 
+$forceddefaults = array(
+    'autodetect' => 0,
+    // 'bypassall' => !optional_param('forcedrupalpass', false, PARAM_BOOL),
+);
+
 // define default settings:
 $defaults = array(
   'autodetect' => 0,
   'duallogin' => 1,
-  'host_uri' => $CFG->wwwroot,
+  'host_uri' => '',
   'cookiedomain' => '',
   'remote_user' => '',
   'remote_pw' => '',
+  'timeout' => 15,
   'remove_user' => AUTH_REMOVEUSER_KEEP,
   'cohorts' => 0,
   'cohort_view' => "",
@@ -86,23 +92,29 @@ $config = (array)$config + $defaults;
 
 // The defaults give us enough to actually start the endpoint/sso configuration and tests
 
-if ($configempty && is_enabled_auth('drupalservices') && $config->autodetect) {
-    if (function_exists('debug_trace')) {
-        debug_trace('Autodetect mode ON: No previous configuration detected, attempting auto configuration');
+if ($configempty && is_enabled_auth('drupalservices') && $config['autodetect'] && $forceddefaults['autodetect']) {
+    if (!empty($defaults['debug']) && function_exists('debug_trace')) {
+        debug_trace('Autodetect mode ON: No previous configuration detected, attempting auto configuration', TRACE_NOTICE, 'auth_drupalservices');
     }
 
     // Autodetect sso settings.
+    /*
     if ($base_sso_settings = $drupalauth->detect_sso_settings($config['host_uri'])) {
 
         // Merge in the resulting settings.
         $config = $base_sso_settings + $config;
     }
-    if (function_exists('debug_trace')) {
-        debug_trace("using the initial settings.");
+    */
+    if (!empty($defaults['debug']) && function_exists('debug_trace')) {
+        debug_trace("Drupal services : Using the initial settings.", TRACE_NOTICE, 'auth_drupalservices');
     }
 
     // Recheck for config host uri after autodetection.
     $configempty = empty($config->host_uri);
+} else {
+    if (!empty($defaults['debug']) && function_exists('debug_trace')) {
+        debug_trace('Autodetect mode OFF. Using stored config.', TRACE_NOTICE, 'auth_drupalservices');
+    }
 }
 
 // Switch these over to objects now that all the merging is done.
@@ -110,7 +122,7 @@ $defaults = (object)$defaults;
 $config = (object)$config;
 
 // Build an endpoint status item here:
-$settings->add(new admin_setting_heading('drupalsso_status', 
+$settings->add(new admin_setting_heading('drupalsso_status',
     new lang_string('servicestatus_header', 'auth_drupalservices'),
     new lang_string('servicestatus_header_info', 'auth_drupalservices')));
 
@@ -121,6 +133,11 @@ $settings->add(new admin_setting_heading('drupalsso_settings',
 $settings->add(new admin_setting_configtext('auth_drupalservices/host_uri',
     new lang_string('auth_drupalservices_host_uri_key', 'auth_drupalservices'),
     new lang_string('auth_drupalservices_host_uri', 'auth_drupalservices'),
+    $defaults->host_uri, PARAM_TEXT));
+
+$settings->add(new admin_setting_configtext('auth_drupalservices/cookiedomain',
+    new lang_string('auth_drupalservices_cookiedomain_key', 'auth_drupalservices'),
+    new lang_string('auth_drupalservices_cookiedomain', 'auth_drupalservices'),
     $defaults->host_uri, PARAM_TEXT));
 
 $settings->add(new admin_setting_configcheckbox('auth_drupalservices/autodetect',
@@ -138,40 +155,62 @@ $settings->add(new admin_setting_configpasswordunmask('auth_drupalservices/remot
     new lang_string('auth_drupalservices_remote_pw', 'auth_drupalservices'),
     $defaults->remote_pw, PARAM_TEXT));
 
+$settings->add(new admin_setting_configtext('auth_drupalservices/timeout',
+    new lang_string('auth_drupalservices_timeout_key', 'auth_drupalservices'),
+    new lang_string('auth_drupalservices_timeout', 'auth_drupalservices'),
+    $defaults->timeout, PARAM_TEXT));
+
 $settings->add(new admin_setting_configcheckbox('auth_drupalservices/duallogin',
     new lang_string('auth_drupalservices_duallogin_key', 'auth_drupalservices'),
     new lang_string('auth_drupalservices_duallogin', 'auth_drupalservices'),
     $defaults->duallogin, PARAM_BOOL));
 
+$drupaloptions = array('7' => 'Drupal <= 7', '8' => 'Drupal >= 8 ');
+$settings->add(new admin_setting_configselect('auth_drupalservices/drupalversion',
+    new lang_string('auth_drupalservices_drupalversion', 'auth_drupalservices'),
+    new lang_string('auth_drupalservices_drupalversion_desc', 'auth_drupalservices'),
+    7, $drupaloptions));
+
 // Now we should have all essential data. Let's try
 
 $endpoint_reachable = false;
+
+if (!empty($forceddefaults['bypassall'])) {
+    if (!empty($defaults['debug']) && function_exists('debug_trace')) {
+        debug_trace('Full bypass.', TRACE_NOTICE, 'auth_drupalservices');
+    }
+    return;
+}
 
 if (!$configempty) {
 
     $str = '';
 
+    if (!empty($defaults->debug) && function_exists('debug_trace')) {
+        debug_trace('Building API on '.$config->host_uri);
+    }
     $drupalserver = new RemoteAPI($config->host_uri);
 
-    // the settings service is public/public and just returns the cookiedomain and user field names (not data)
+    // The settings service is public/public and just returns the cookiedomain and user field names (not data).
     $remote_settings = $drupalserver->Settings(null, $debugret);
     if ($remote_settings) {
-        if (debugging()) {
-            $str .= "Received a cookie value from the remote server.";
-        }
         $endpoint_reachable = true;
 
-        // we connected and the service is actively responding, so confirm config
+        // We connected and the service is actively responding, so confirm config.
         set_config('host_uri', $config->host_uri, 'auth_drupalservices');
 
-        // if the cookie domain hasn't been previously set, set it now
+        // If the cookie domain hasn't been previously set, set it now.
         if ($config->cookiedomain == '') {
-            // the cookiedomain should get received via the Settings call
+            // The cookiedomain should get received via the Settings call.
             $config->cookiedomain = ''.$remote_settings->cookiedomain;
             set_config('cookiedomain', $config->cookiedomain, 'auth_drupalservices');
         }
+        $str .= "Settings: Using cookie domain : {$config->cookiedomain}<br/>";
+        if (function_exists('debug_trace')) {
+            debug_trace("Using cookie domain : {$config->cookiedomain}", TRACE_DEBUG_FINE);
+        }
     } else {
-        //TODO: This should get converted into a proper message.
+        // TODO: This should get converted into a proper message.
         $str .= $OUTPUT->box_start('error');
         $str .= $OUTPUT->notification("The moodlesso service is unreachable. Please verify that you have the Mooodle SSO drupal module installed and enabled: http://drupal.org/project/moodle_sso ");
         $str .= $OUTPUT->box_end();
@@ -181,88 +220,124 @@ if (!$configempty) {
         return;
     }
 
+    // We got a cookie domain from the remote Drupal.
     $fulluser_keys = array();
     if ($config->cookiedomain) {
+        if (!empty($defaults->debug) && function_exists('debug_trace')) {
+            debug_trace("Using cookie domain : {$config->cookiedomain}<br/>", TRACE_NOTICE, 'auth_drupalservices');
+        }
         $drupalsession = $drupalauth->get_drupal_session($config);
         // Now that the cookie domain is discovered, try to reach out to the endpoint to test SSO.
         // $apiObj = new RemoteAPI($config->host_uri, 1, $drupalsession);
         $apiObj = new RemoteAPI($config->host_uri);
 
         // Connect to Drupal with this session.
-        $logoutret = $apiObj->Logout($logouterror); // Ensure we have no session
+        if (!empty($defaults->debug)) {
+            mtrace("Settings: Login out (cleaning)<br/>");
+        }
+        $logoutret = $apiObj->Logout($logouterror); // Ensure we have no session.
+        if (!empty($defaults->debug)) {
+            $str .= "Settings: Login in {$config->remote_user} (service user)<br/>";
+        }
         $loginret = $apiObj->Login($config->remote_user, $config->remote_pw, $loginerror);
 
+        if (function_exists('debug_trace')) {
+            debug_trace("Settings: Connecting", TRACE_NOTICE, 'auth_drupalservices');
+            $str .= "Settings: Connecting...<br/>";
+        }
         if ($loggedin_user = $apiObj->Connect()) {
-            if ($loggedin_user->user->uid !== false) {
-                if (debugging()) {
-                    $str .= "Service were reached, here's the logged in user : <pre>".print_r($loggedin_user,true).'</pre>';
-                }
+            if ($config->drupalversion >= 8) {
+                $user = $loggedin_user;
+                $loggedin_user = new StdClass;
+                $loggedin_user->user = $user;
+            }
+
+            $uuid = $loggedin_user->user->uid;
+
+            if ($uuid !== false) {
                 $endpoint_reachable = true;
             }
 
-            // This data should be cached - its possible that a non-admin user.
-            $fulluser = (array)$apiObj->Index("user/".$loggedin_user->user->uid);
-            if (debugging()) {
-                $str .= "here's the complete user:".print_r($fulluser,true);
+            if ($config->drupalversion < 8) {
+                // This data should be cached - its possible that a non-admin user.
+                $fulluser = (array)$apiObj->Index("user/".$uuid);
+                if ($CFG->debug == DEBUG_DEVELOPER) {
+                    $str .= "here's the complete user:".print_r($fulluser, true);
+                }
+            } else {
+                $fulluser = (array)$loggedin_user->user;
             }
 
             // Turn the fulluser fields into key/value options
-            $fulluser_keys = array_combine(array_keys($fulluser), array_keys($fulluser));
+            $fulluserkeys = array_combine(array_keys($fulluser), array_keys($fulluser));
         } else {
             $str .= $OUTPUT->box_start('error');
-            $str .= "Logout : $logoutret <pre>".print_r($logouterror, true)."</pre><br/>";
-            $str .= "Login $config->remote_user : $loginret <pre>".print_r($loginerror, true)."</pre><br/>";
-            $str .= $OUTPUT->notification("Could not reach the logged in user <pre>".print_r($loggedin_user,true)."</pre>");
-            $tests['session'] = array('success' => false, 'message' => "system/connect: User session data unreachable. Ensure that the server is reachable");
+            $str .= "Settings: Connect failed<br/>";
+            if (!empty($logouterror)) {
+                $str .= "Settings: Logout : <pre>".htmlentities(print_r($logouterror, true))."</pre><br/>";
+            }
+            if (!empty($loginerror)) {
+                $str .= "Settings: Login '{$config->remote_user}' : <pre>".htmlentities(print_r($loginerror, true))."</pre><br/>";
+            }
             $str .= $OUTPUT->box_end();
-
             $settings->add(new admin_setting_heading('drupalsso_errormessage', new lang_string('misconfig', 'auth_drupalservices'), $str));
-
             return;
         }
     }
 }
 
 if (!empty($str)) {
-    // Add a debugging panel
+    // Add a debugging panel.
     $settings->add(new admin_setting_heading('drupalsso_debugmessage', new lang_string('debug', 'auth_drupalservices'), $str));
 }
 
-// don't allow configurations unless the endpoint is reachable
+// Don't allow configurations unless the endpoint is reachable.
 if ($config->cookiedomain !== false && $endpoint_reachable) {
-    $settings->add(new admin_setting_configcheckbox('forcelogin',
-        new lang_string('forcelogin', 'admin'),
-        new lang_string('configforcelogin', 'admin'), 0));
-    $settings->add(new admin_setting_configcheckbox('auth_drupalservices/call_logout_service',
-        new lang_string('auth_drupalservices_logout_drupal_key', 'auth_drupalservices'),
-        new lang_string('auth_drupalservices_logout_drupal', 'auth_drupalservices'), 1));
 
-    //todo: these should be in a fieldset. a heading will do for now
-    $settings->add(new admin_setting_heading('drupalsso_userfieldmap', new lang_string('userfieldmap_header', 'auth_drupalservices'), new lang_string('userfieldmap_header_desc', 'auth_drupalservices')));
+    $key = 'forcelogin';
+    $label = new lang_string('forcelogin', 'admin');
+    $desc = new lang_string('configforcelogin', 'admin');
+    $default = 0;
+    $settings->add(new admin_setting_configcheckbox($key, $label, $desc, $default));
+
+    $key = 'auth_drupalservices/call_logout_service';
+    $label = new lang_string('auth_drupalservices_logout_drupal_key', 'auth_drupalservices');
+    $desc = new lang_string('auth_drupalservices_logout_drupal', 'auth_drupalservices');
+    $default = 1;
+    $settings->add(new admin_setting_configcheckbox($key, $label, $desc, $default));
+
+    // Todo: these should be in a fieldset. a heading will do for now.
+    $key = 'drupalsso_userfieldmap';
+    $label = new lang_string('userfieldmap_header', 'auth_drupalservices');
+    $desc = new lang_string('userfieldmap_header_desc', 'auth_drupalservices');
+    $settings->add(new admin_setting_heading($key, $label, $desc));
+
+    $fieldoptions = array('' => '-- select --') + (array)$fulluserkeys;
 
     foreach ($drupalauth->userfields as $field) {
-        $settings->add(new admin_setting_configselect('auth_drupalservices/field_map_'.$field,
-            $field,
-            new lang_string('fieldmap', 'auth_drupalservices', $field),
-            null,
-            array(''=>"-- select --") + (array)$fulluser_keys
-        ));
+        $key = 'auth_drupalservices/field_map_'.$field;
+        $label = $field;
+        $desc = new lang_string('fieldmap', 'auth_drupalservices', $field);
+        $default = '';
+        $settings->add(new admin_setting_configselect($key, $label, $desc, $default, $fieldoptions));
     }
 
-    // CHANGE : add support of custom fields
+    // CHANGE : add support of custom fields.
     $customfields = $DB->get_records('user_info_field', array());
-    foreach($customfields as $cf) {
-    $settings->add(new admin_setting_configselect('auth_drupalservices/customfield_map_'.$cf->id,
-      $cf->shortname,
-      new lang_string('fieldmap', 'auth_drupalservices',$cf->name),
-      null,
-      array(''=>"-- select --") + (array)$fulluser_keys
-      ));
+    foreach ($customfields as $cf) {
+        $key = 'auth_drupalservices/customfield_map_'.$cf->id;
+        $label = $cf->shortname;
+        $desc = new lang_string('fieldmap', 'auth_drupalservices', $cf->name);
+        $default = '';
+        $settings->add(new admin_setting_configselect($key, $label, $desc, $default, $fieldoptions));
     }
     // /CHANGE
 
-    //todo: these should be in a fieldset related to importing users. a heading will do for now
-    $settings->add(new admin_setting_heading('drupalsso_userimport', new lang_string('userimport_header', 'auth_drupalservices'), new lang_string('userimport_header_desc', 'auth_drupalservices')));
+    // Todo: these should be in a fieldset related to importing users. a heading will do for now.
+    $key = 'drupalsso_userimport';
+    $label = new lang_string('userimport_header', 'auth_drupalservices');
+    $desc = new lang_string('userimport_header_desc', 'auth_drupalservices');
+    $settings->add(new admin_setting_heading($key, $label, $desc));
 
 //  $settings->add(new admin_setting_configselect('auth_drupalservices/remove_user',
 //    new lang_string('auth_drupalservicesremove_user_key', 'auth_drupalservices'),
@@ -273,20 +348,22 @@ if ($config->cookiedomain !== false && $endpoint_reachable) {
 //      AUTH_REMOVEUSER_FULLDELETE => get_string('auth_remove_delete', 'auth'),
 //    )));
 
-    //todo: these fields shouldn't be here if cohorts are not enabled in moodle
-    $settings->add(new admin_setting_configselect('auth_drupalservices/cohorts',
-        new lang_string('auth_drupalservices_cohorts_key', 'auth_drupalservices'),
-        new lang_string('auth_drupalservices_cohorts', 'auth_drupalservices'),
-        $defaults->cohorts, array(get_string('no'), get_string('yes'))));
+    $yesnooptions = array(get_string('no'), get_string('yes'));
 
-    $settings->add(new admin_setting_configtext('auth_drupalservices/cohort_view',
-        new lang_string('auth_drupalservices_cohort_view_key', 'auth_drupalservices'),
-        new lang_string('auth_drupalservices_cohort_view', 'auth_drupalservices'),
-        $defaults->cohort_view, PARAM_TEXT));
+    // Todo: these fields shouldn't be here if cohorts are not enabled in moodle.
+    $key = 'auth_drupalservices/cohorts';
+    $label = new lang_string('auth_drupalservices_cohorts_key', 'auth_drupalservices');
+    $desc = new lang_string('auth_drupalservices_cohorts', 'auth_drupalservices');
+    $settings->add(new admin_setting_configselect($key, $label, $desc, $defaults->cohorts, $yesnooptions));
+
+    $key = 'auth_drupalservices/cohort_view';
+    $label = new lang_string('auth_drupalservices_cohort_view_key', 'auth_drupalservices');
+    $desc = new lang_string('auth_drupalservices_cohort_view', 'auth_drupalservices');
+    $settings->add(new admin_setting_configtext($key, $label, $desc, $defaults->cohort_view, PARAM_TEXT));
 
     $syncurl = new moodle_url('/auth/drupalservices/manualsync.php');
-    $settings->add(new admin_setting_heading('drupalsso_manualsync',
-        new lang_string('drupalmanualsync', 'auth_drupalservices'),
-        '<a href="'.$syncurl.'">'.get_string('rundrupalmanualsync', 'auth_drupalservices').'</a>',
-        $defaults->cohort_view, PARAM_TEXT));
+    $key = 'drupalsso_manualsync';
+    $label = new lang_string('drupalmanualsync', 'auth_drupalservices');
+    $desc = '<a href="'.$syncurl.'">'.get_string('rundrupalmanualsync', 'auth_drupalservices').'</a>';
+    $settings->add(new admin_setting_heading($key, $label, $desc));
 }

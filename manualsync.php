@@ -39,10 +39,8 @@ $confirm = optional_param('confirm', false, PARAM_BOOL);
 $forceall = optional_param('forceall', false, PARAM_BOOL);
 
 echo $OUTPUT->box_start('drupalservices-runsync-results');
+
 if ($confirm) {
-
-    
-
     echo '<pre>';
 
     $auth = new auth_plugin_drupalservices();

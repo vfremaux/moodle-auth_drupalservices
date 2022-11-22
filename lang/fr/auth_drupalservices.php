@@ -21,28 +21,21 @@
 
 $string['drupalservices:config'] = 'Peut configurer le SSO Drupal';
 
-$string['pluginname'] = 'Services Drupal';
+$string['privacy:metadata'] = 'Ce plugin ne détient pas directement de données utilisateur';
 
+$string['pluginname'] = 'Services Drupal';
 $string['servicestatus_header']= 'Etat des services Drupal Service';
 $string['servicestatus_header_info']= 'L\'état de la liaison SSO Moodle/Drupal est indiqué ci-dessous';
-
-
 $string['servicesettings_header'] = 'Réglages des services Drupal';
-
 $string['servicesettings_header_info'] = 'Les réglages suivants permettent de configurer la liaison SSO entre Moodle et un site Drupal.';
-
 $string['servicesettings_header_info_firsttime'] = 'Il semble que ce soit la première fois que cette configuration soit faite. Moodle a tenté de découvrir automatiquement
 la configuration correcte du SSO. Vérifiez que l\'URL du site Drupal est correcte.';
-
 $string['userfieldmap_header'] = 'Correspondance des attributs de profil';
 $string['userfieldmap_header_desc'] = 'Cette correspondance met en relation les attributs de profil utilisateur de Moodle avec les données correspondantes dans le site Drupal. Les données de profil Moodle seront mises à jour chaque fois que les utilisateur Drupal se connecteront dans Moodle. Si l\'import massif de compte est activé, les profils Moodle seront alors aussi resynchronisés à chaque passage de l\'import.';
 $string['fieldmap'] = 'Champ drupal pour {$a}';
-
 $string['userimport_header'] = 'Réglage de l\'import/migration d\'utilisateurs Drupal';
 $string['userimport_header_desc'] = 'Ces réglages permettent de configurer un import massif et une synchronisation régulière des utilisateurs Drupal dans Moodle à partir du script sync_users.php. Seuls les utilisateurs présents dans Drupal associés au rôle "Moodle Services" seront importés. Les identifiants de compte ci-dessous doivent être renseignés. Tous les attributs dont les correspondances sont définies ci-avant seront importés.';
-
 $string['auth_drupalservicesdescription'] = 'Ce plugin d\'authentification permet de mettre en place un Single Sign-on (SSO) avec Drupal. Ce module examine dans le contexte local de l\'utilisateur l\'existence d\'un cookie Drupal conforme à l\'identité du site lié et indiquant la présence d\'une session Drupal active. cette information est réutilisée pour créer automatiquement une session Moodle poiur le compte utilisateur Moodle qui correspond. Le profil de l\'utilisateur Moodle activé par la session sera resynchronisé (pour les attributs en correspondance) avec les données courantes du compte Drupal. Si l\'utilisateur n\'est pas encore référencé dans Moodle, alors il sera créé. Le plugin de services côté Drupal doit être installé pour que la liaison fonctionne. Lisez attentivement le fichier README pour les instructions \'installation.';
-
 $string['auth_drupalservices_debug_key'] = 'Deboggage';
 $string['auth_drupalservices_debug'] = 'Si actif, sortira tous les messages de deboggage.';
 $string['auth_drupalservices_autodetect_key'] = 'Autodetection Drupal';
@@ -61,6 +54,10 @@ $string['auth_drupalservices_cohorts_key'] = 'Créer les cohortes';
 $string['auth_drupalservices_cohorts'] = 'Permet de créer automatiquement des cohortes en invoquant une vue particulière sur Drupal.';
 $string['auth_drupalservices_cohort_view_key'] = 'chemin vers la vue de création de cohortes';
 $string['auth_drupalservices_cohort_view'] = 'Indiquez le chemin vers la vue Drupal de création des cohortes.';
+$string['auth_drupalservices_drupalversion'] = 'Version de drupal';
+$string['auth_drupalservices_drupalversion_desc'] = 'Numéro de version majeure de Drupal. L\'implémentation change à partir de Drupal 8.';
+$string['auth_drupalservices_timeout_key'] = 'Timeout';
+$string['auth_drupalservices_timeout'] = "Temps max autorisé pour les connexions à l\'API Drupal";
 
 $string['auth_drupalservicesnorecords'] = 'Drupal n\'a aucun utilisateur référencé pour l\'import !';
 $string['auth_drupalservicescreateaccount'] = 'Impossible de créer le compte utilisateur Moodle pour {$a}';
@@ -82,12 +79,21 @@ $string['erroruserexistsinternally'] = 'Votre compte utilisateur n\'a pas pu êt
 $string['enableauth'] = 'Activation des services Drupal';
 $string['enabling_info'] = 'La configuration complète de ce plugin suppose une activation préalable de cette méthode d\'authentification';
 $string['debug'] = 'Message de deboggage ';
+$string['login'] = 'Se connecter';
 $string['misconfig'] = 'Erreur de configuration ';
 $string['errormessage'] = 'Erreur SSO Drupal ';
 $string['drupalaccounts'] = 'Se connecter avec un compte Drupal';
 $string['moodleaccounts'] = 'Se connecter avec un compte local';
+$string['moodledescription'] = 'Vous disposez d\'un compte direct ?';
+$string['drupaldescription'] = 'Vous disposez d\'un compte "Portail" ?';
 $string['drupalduallogin'] = 'Double authentification Drupal';
 $string['drupalmanualsync'] = 'Synchronisation manuelle';
 $string['rundrupalmanualsync'] = 'Synchroniser drupal en mode interactif';
 $string['confirmrunsync'] = 'Confirmez la synchronisation';
 $string['confirmrunsyncall'] = 'Confirmez pour une synchronisation complete';
+$string['synctask'] = 'Synchronisation des utilisateurs Drupal';
+
+$string['headerdescription'] = '';
+$string['drupaldescription'] = '';
+$string['moodledescription'] = '';
+$string['footerdescription'] = '';

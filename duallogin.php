@@ -33,14 +33,44 @@ $PAGE->set_heading(get_string('drupalduallogin', 'auth_drupalservices'));
 
 echo $OUTPUT->header();
 
-echo $OUTPUT->box_start('drupalservices-duallogin');
+$template = new StdClass;
 
-$drupalforcedloginurl = new moodle_url('/login/index.php', array('sso' => 'drupal'));
-echo '<div id="drupal-accounts"><a href="'.$drupalforcedloginurl.'">'.get_string('drupalaccounts', 'auth_drupalservices').'</a></div>';
+$template->hasheaderdescription = false;
+$description = get_string('headerdescription', 'auth_drupalservices');
+if (!empty($description)) {
+    $template->hasheaderdescription = true;
+}
 
-$moodleloginurl = new moodle_url('/login/index.php', array('sso' => 'no'));
-echo '<div id="moodle-accounts"><a href="'.$moodleloginurl.'">'.get_string('moodleaccounts', 'auth_drupalservices').'</a></div>';
+if (is_enabled_auth('drupalservices')) {
+    $template->drupalinstalled = true;
+    $template->hasdrupaldescription = false;
+    $description = get_string('drupaldescription', 'auth_drupalservices');
+    if (!empty($description)) {
+        $template->hasdrupaldescription = true;
+    }
+}
 
-echo $OUTPUT->box_end();
+$template->hasmoodledescription = false;
+$description = get_string('moodledescription', 'auth_drupalservices');
+if (!empty($description)) {
+    $template->hasmoodledescription = true;
+}
+
+$template->hasfooterdescription = false;
+$description = get_string('footerdescription', 'auth_drupalservices');
+if (!empty($description)) {
+    $template->hasfooterdescription = true;
+}
+
+if (is_enabled_auth('netypareo')) {
+    $template->netypareoinstalled = true;
+    include_once($CFG->dirroot.'/auth/netypareo/xlib.php');
+    \auth_netypareo\xapi::add_login_elements($template);
+}
+
+$template->drupalforcedloginurl = new moodle_url('/login/index.php', array('sso' => 'drupal'));
+$template->moodleloginurl = new moodle_url('/login/index.php', array('sso' => 'no'));
+
+echo $OUTPUT->render_from_template('auth_drupalservices/duallogin', $template);
 
 echo $OUTPUT->footer();

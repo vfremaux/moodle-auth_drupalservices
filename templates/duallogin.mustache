@@ -1,0 +1,52 @@
+
+
+
+<!-- auth_drupalservices/duallogin -->
+<div class="drupalservices-duallogin">
+    {{#hasheaderdescription}}
+    <div id="header-description">
+        {{#str}}headerdescription, auth_drupalservices{{/str}}
+    </div>
+    {{/hasheaderdescription}}
+
+    <div class="login-panels">
+        {{#drupalinstalled}}
+        <div class="drupal-accounts-panel accounts-panel">
+            {{#hasdrupaldescription}}
+            <div id="drupal-description" class="accounts-description">
+                {{#str}}drupaldescription, auth_drupalservices{{/str}}
+            </div>
+            {{/hasdrupaldescription}}
+
+            <div id="drupal-accounts" class="accounts-link">
+                {{#str}}drupalaccounts, auth_drupalservices{{/str}}<br/>
+                <a class="btn btn-primary login-btn" href="{{{drupalforcedloginurl}}}">{{#str}}login, auth_drupalservices{{/str}}</a>
+            </div>
+        </div>
+        {{/drupalinstalled}}
+
+        <div class="moodle-accounts-panel accounts-panel">
+            {{#hasmoodledescription}}
+            <div id="moodle-description" class="accounts-description">
+                {{#str}}moodledescription, auth_drupalservices{{/str}}
+            </div>
+            {{/hasmoodledescription}}
+
+            <div id="moodle-accounts" class="accounts-link">
+                {{#str}}moodleaccounts, auth_drupalservices{{/str}}<br/>
+                <a class="btn btn-primary login-btn" href="{{{moodleloginurl}}}">{{#str}}login, auth_drupalservices{{/str}}</a>
+            </div>
+        </div>
+
+        {{#netypareoinstalled}}
+        {{> auth_netypareo/duallogin }}
+        {{/netypareoinstalled}}
+    </div>
+
+    {{#hasfooterdescription}}
+    <div id="footer-description">
+        {{#str}}footerdescription, auth_drupalservices{{/str}}
+    </div>
+    {{/hasfooterdescription}}
+</div>
+<!-- /auth_drupalservices/duallogin -->

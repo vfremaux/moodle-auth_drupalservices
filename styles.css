@@ -1,9 +1,26 @@
-#drupal-accounts {
+.accounts-link {
     padding:40px;
     font-size:1.3em;
 }
 
-#moodle-accounts {
-    padding:40px;
-    font-size:1.3em;
+.login-panels {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.accounts-panel {
+    border-radius: 15px;
+    min-height: 120px;
+    background-color: #fcfcfc;
+    margin: 10px;
+    padding: 10px;
+}
+
+.accounts-link {
+    text-align: center;
+}
+
+.login-btn {
+    margin-top: 10px;
 }
