@@ -35,11 +35,12 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2020101401; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires = 2022041200; // Requires this Moodle version.
+$plugin->version = 2025022100; // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires = 2022041900; // Requires this Moodle version.
 $plugin->component = 'auth_drupalservices'; // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_RC;
-$plugin->release = '4.0.0 (Build 2020101400)';
+$plugin->release = '4.5.0 (Build 2025022100)';
+$plugin->supported = [401, 405];
 
 // Non moodle attributes.
-$plugin->codeincrement = '4.0.0002';
+$plugin->codeincrement = '4.5.0003';

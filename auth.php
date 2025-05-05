@@ -104,10 +104,15 @@ class auth_plugin_drupalservices extends auth_plugin_base {
 
         if ($drupalsession == null) {
             if (empty($config->duallogin) || $sso == 'drupal') {
-                // If we are not in dual login, or have a forced return to login through Drupal
-                if (function_exists('debug_trace')) {
-                    // debug_trace("No drupal session detected, sending to drupal for login.");
+
+                // This is a bypass used by some situations such as multiroot alternatives.
+                // To be driven by config.php.
+                if (!empty($CFG->auth_drupalservices_forcemoodlelogin)) {
+                    echo "Drupalservices : finds auth_drupalservices_forcemoodlelogin is true ";
+                    return;
                 }
+
+                // If we are not in dual login, or have a forced return to login through Drupal
                 // redirect to drupal login page with destination
                 // if (isset($SESSION->wantsurl) and (strpos($SESSION->wantsurl, $CFG->wwwroot) == 0)) {
                     // the URL is set and within Moodle's environment
@@ -133,6 +138,12 @@ class auth_plugin_drupalservices extends auth_plugin_base {
                 // }
                 return; // just send user to login page
             } else {
+                // This is a bypass used by some situations such as multiroot alternatives.
+                // To be driven by config.php.
+                if (!empty($CFG->auth_drupalservices_forcemoodlelogin)) {
+                    return;
+                }
+
                 // If not explicit go to the dual login choice screen.
                 $dualchoiceurl = new moodle_url('/auth/drupalservices/duallogin.php');
                 redirect($dualchoiceurl);
@@ -382,6 +393,11 @@ class auth_plugin_drupalservices extends auth_plugin_base {
      */
     function logoutpage_hook() {
         global $CFG, $SESSION, $USER;
+
+        // To be driven by config.php.
+        if (!empty($CFG->auth_drupalservices_forcemoodlelogin)) {
+            return;
+        }
 
         $config = get_config('auth_drupalservices');
 

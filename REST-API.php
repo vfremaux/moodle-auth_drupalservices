@@ -337,7 +337,7 @@ class RemoteAPI {
         $callerId = 'RemoteAPI->Connect';
         if (!$this->VerifyLoggedIn($callerId)) {
             if (function_exists('debug_trace')) {
-                debug_trace("Connect Error: Could not check is logged in");
+                debug_trace("Connect Error: Could not check is logged in", TRACE_DEBUG_FINE);
             }
             return null; // error.
         }

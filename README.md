@@ -22,3 +22,7 @@ use the highest numbered tag for your moodle and plugin version. For example: 2.
 Configuration instructions have been moved to the github wiki. https://github.com/cannod/moodle-drupalservices/wiki
 
 If you would like to help collaborate on this project, please request using a GitHub issue and we'll add you as a Collaborator.
+
+##### X.X.00003 
+
+Accepts interaction with Netypareo connector.

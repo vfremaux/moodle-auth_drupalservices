@@ -242,7 +242,7 @@ if (!$configempty) {
         $loginret = $apiObj->Login($config->remote_user, $config->remote_pw, $loginerror);
 
         if (function_exists('debug_trace')) {
-            debug_trace("Settings: Connecting", TRACE_NOTICE, 'auth_drupalservices');
+            debug_trace("Settings: Connecting", TRACE_DEBUG_FINE, 'auth_drupalservices');
             $str .= "Settings: Connecting...<br/>";
         }
         if ($loggedin_user = $apiObj->Connect()) {
